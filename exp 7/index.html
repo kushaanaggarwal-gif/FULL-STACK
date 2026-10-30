@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 7: Secure APIs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h2>Exp 7: Secure APIs</h2>
+        <ul>
+            <li><a href="#" onclick="showSection('overview')">Overview</a></li>
+            <li><a href="#" onclick="showSection('jwt')">JWT Auth</a></li>
+            <li><a href="#" onclick="showSection('rbac')">RBAC</a></li>
+            <li><a href="#" onclick="showSection('encryption')">Encryption</a></li>
+            <li><a href="#" onclick="showSection('reports')">Test Reports</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- OVERVIEW -->
+        <div id="overview" class="section active">
+            <h1>Overview</h1>
+            <p><strong>Experiment:</strong> Secure APIs using JWT, Role-Based Access Control (RBAC), Encryption, and Token Management.</p>
+            <p>This minimalistic dashboard allows you to test various security components of a REST API backend.</p>
+            <div class="card">
+                <h3>Backend Status</h3>
+                <p>Status: <span id="backend-status" class="status-badge">Checking...</span></p>
+                <button onclick="checkBackendStatus()">Check Connection</button>
+                <p><small>Note: Expects a Spring Boot backend running on <code>http://localhost:8080</code></small></p>
+            </div>
+            <div class="card">
+                <h3>Components</h3>
+                <ul>
+                    <li><strong>JWT Authentication:</strong> Secure login and token generation.</li>
+                    <li><strong>RBAC:</strong> Role-based access restriction (USER vs ADMIN).</li>
+                    <li><strong>Encryption:</strong> Server-side AES text encryption.</li>
+                    <li><strong>Token Management:</strong> Expiry and refresh tokens.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- JWT AUTHENTICATION -->
+        <div id="jwt" class="section">
+            <h1>JWT Authentication</h1>
+            <div class="card">
+                <h3>Login</h3>
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username (e.g., user or admin)">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password">
+                </div>
+                <button onclick="login()">Login</button>
+                <div id="login-response" class="response-box">Awaiting login...</div>
+                
+                <div style="margin-top: 15px;">
+                    <strong>JWT: </strong>
+                    <span id="jwt-display" class="masked-token">No token</span>
+                    <button onclick="toggleToken()">Reveal/Hide</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Test Protected API (/api/test)</h3>
+                <button onclick="testApi(true)">Test With Token</button>
+                <button onclick="testApi(false)">Test Without Token</button>
+                <div id="api-response" class="response-box">Response will appear here...</div>
+            </div>
+        </div>
+
+        <!-- RBAC -->
+        <div id="rbac" class="section">
+            <h1>Role-Based Access Control (RBAC)</h1>
+            <p>Test authorization by accessing endpoints restricted by role. Make sure you log in via the JWT section first.</p>
+            <div class="card">
+                <button onclick="testRbac('user')">Test USER Endpoint (/api/user)</button>
+                <button onclick="testRbac('admin')">Test ADMIN Endpoint (/api/admin)</button>
+                <div id="rbac-response" class="response-box">Response will appear here...</div>
+            </div>
+        </div>
+
+        <!-- ENCRYPTION -->
+        <div id="encryption" class="section">
+            <h1>Encryption and Token Management</h1>
+            <div class="card">
+                <h3>AES Encryption/Decryption</h3>
+                <p>Send text to the backend for encryption and decryption. No keys are exposed here.</p>
+                <div class="form-group">
+                    <input type="text" id="plain-text" placeholder="Text to encrypt">
+                    <button onclick="encryptText()">Encrypt</button>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="encrypted-text" placeholder="Encrypted result">
+                    <button onclick="decryptText()">Decrypt</button>
+                </div>
+                <div id="crypto-response" class="response-box">Result will appear here...</div>
+            </div>
+            
+            <div class="card">
+                <h3>Token Management</h3>
+                <p>Test token refresh handling (if implemented in backend).</p>
+                <button onclick="refreshToken()">Test Refresh Token</button>
+                <div id="token-response" class="response-box">Response will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TEST REPORTS -->
+        <div id="reports" class="section">
+            <h1>Test Reports</h1>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <p>Summary: <span id="test-summary">Not run yet</span></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test ID</th>
+                        <th>Description</th>
+                        <th>Expected</th>
+                        <th>Result</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="test-table-body">
+                    <!-- Rows generated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

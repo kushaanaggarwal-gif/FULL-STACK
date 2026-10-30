@@ -1,0 +1,253 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #ffffff;
+  color: #212529;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header-title h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.header-title p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-controls button {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.header-controls button:hover {
+  background-color: #e2e6ea;
+}
+
+.current-month {
+  font-weight: 600;
+  min-width: 150px;
+  text-align: right;
+}
+
+.add-event-section {
+  margin-bottom: 24px;
+}
+
+.add-event-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.add-event-form input[type="text"],
+.add-event-form input[type="date"] {
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.add-event-form input[type="text"]:focus,
+.add-event-form input[type="date"]:focus {
+  border-color: #0d6efd;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #495057;
+  cursor: pointer;
+}
+
+.add-event-form button {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.add-event-form button:hover {
+  background-color: #0b5ed7;
+}
+
+.app-main {
+  flex-grow: 1;
+  margin-bottom: 32px;
+}
+
+.app-performance-panel {
+  flex: 1;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.lower-panels {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.test-report-panel {
+  flex: 2;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.test-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.test-report-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.run-tests-btn {
+  background-color: #198754;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.run-tests-btn:disabled {
+  background-color: #6c757d;
+  cursor: wait;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  background-color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+
+.passed-text { color: #198754; font-weight: 600; }
+.failed-text { color: #dc3545; font-weight: 600; }
+
+.test-cases {
+  background-color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.test-case {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.test-case:last-child {
+  border-bottom: none;
+}
+
+.passed-icon { color: #198754; font-weight: bold; }
+.failed-icon { color: #dc3545; font-weight: bold; }
+
+.test-message {
+  color: #6c757d;
+  font-style: italic;
+}
+.test-message.error {
+  color: #dc3545;
+}
+
+.panel-section {
+  flex: 1;
+}
+
+.panel-section h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 4px;
+}
+
+.panel-section ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.panel-section li {
+  margin-bottom: 6px;
+  color: #495057;
+}
+
+.testing-list li {
+  color: #198754;
+}

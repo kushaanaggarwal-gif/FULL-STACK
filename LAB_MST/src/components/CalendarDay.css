@@ -1,0 +1,55 @@
+.calendar-day {
+  border: 1px solid #e9ecef;
+  min-height: 100px;
+  padding: 4px;
+  background-color: white;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-day.today {
+  background-color: #f8faff;
+}
+
+.calendar-day.today .day-number {
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-day.drag-over {
+  background-color: #eef5ff;
+  border-color: #0d6efd;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.day-number {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  padding: 2px;
+}
+
+.day-render-count {
+  font-size: 0.6rem;
+  color: #adb5bd;
+}
+
+.day-events {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

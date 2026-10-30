@@ -1,0 +1,102 @@
+.App {
+	min-height: 100vh;
+	padding: 42px 18px;
+	color: #263238;
+}
+
+.App > h1 {
+	max-width: 620px;
+	margin: 0 auto 24px;
+	color: #174c4b;
+	font-size: 32px;
+	letter-spacing: 0.3px;
+}
+
+.box {
+	width: min(100%, 620px);
+	margin: auto;
+	padding: 26px;
+	background: #fffdf8;
+	border: 1px solid #eadfce;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(101, 75, 46, 0.12);
+	text-align: left;
+}
+
+.box h3 {
+	margin: 0 0 12px;
+	color: #174c4b;
+}
+
+.box > div:first-child > div {
+	display: inline-flex;
+	align-items: center;
+	margin: 0 8px 8px 0;
+	padding: 7px 10px;
+	background: #e6f2ef;
+	border-radius: 6px;
+	color: #285d5b;
+}
+
+.box > div:first-child input {
+	margin: 0 6px 0 0;
+}
+
+textarea {
+	width: 100%;
+	margin-top: 16px;
+	padding: 12px;
+	border: 1px solid #cdbfae;
+	border-radius: 7px;
+	background: #ffffff;
+	color: #263238;
+	font-size: 16px;
+	resize: vertical;
+}
+
+textarea:focus {
+	outline: 2px solid #9ed1c7;
+	border-color: #27847d;
+}
+
+.box > p {
+	color: #756b61;
+	font-size: 14px;
+}
+
+.box > input[type="file"] {
+	max-width: 100%;
+	margin-top: 8px;
+	color: #5f554b;
+}
+
+button {
+	margin-top: 18px;
+	padding: 10px 20px;
+	border: 0;
+	border-radius: 6px;
+	background: #e36b4d;
+	color: white;
+	cursor: pointer;
+	font-weight: bold;
+	transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+	background: #bf5036;
+	transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+	.App {
+		padding: 28px 14px;
+	}
+
+	.App > h1 {
+		font-size: 26px;
+	}
+
+	.box {
+		padding: 20px;
+	}
+}

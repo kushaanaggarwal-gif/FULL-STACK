@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka Event-Driven Reliability System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #fcfcfc;
+            color: #222;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #dcdcdc;
+            padding: 24px 30px;
+        }
+
+        header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #111;
+            margin-bottom: 4px;
+        }
+
+        header .subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        header .description {
+            font-size: 13px;
+            color: #666;
+        }
+
+        section {
+            border: 1px solid #e2e2e2;
+            padding: 18px 20px;
+            margin-bottom: 22px;
+            background: #fff;
+        }
+
+        section h2 {
+            font-size: 16px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            color: #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #444;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 7px 10px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 24px;
+        }
+
+        .checkbox-group input {
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 7px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #888;
+            background: #f4f4f4;
+            color: #222;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e6e6e6;
+            border-color: #555;
+        }
+
+        button:active {
+            background: #ddd;
+        }
+
+        button.btn-primary {
+            background: #2b5797;
+            border-color: #1e3d6b;
+            color: #fff;
+        }
+
+        button.btn-primary:hover {
+            background: #1e3d6b;
+        }
+
+        button.btn-secondary {
+            background: #6c757d;
+            border-color: #545b62;
+            color: #fff;
+        }
+
+        button.btn-secondary:hover {
+            background: #545b62;
+        }
+
+        button.btn-danger {
+            background: #d9534f;
+            border-color: #d43f3a;
+            color: #fff;
+        }
+
+        button.btn-danger:hover {
+            background: #c9302c;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-alert {
+            margin-top: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            border: 1px solid #d0d7de;
+            background: #f6f8fa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        table th {
+            background: #f7f7f7;
+            font-weight: 600;
+            color: #333;
+        }
+
+        table tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 16px;
+            color: #777;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Status Labels */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 3px;
+            border: 1px solid #bbb;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #f0f0f0; color: #555; border-color: #ccc; }
+        .status-processing { background: #e8f4fd; color: #0366d6; border-color: #b6e3ff; }
+        .status-success { background: #edf9f0; color: #22863a; border-color: #bef5cb; }
+        .status-retrying { background: #fff8e6; color: #b08800; border-color: #ffe58f; }
+        .status-duplicate { background: #f5f0fa; color: #6f42c1; border-color: #d8c2f8; }
+        .status-dlq { background: #faecec; color: #cb2431; border-color: #f9c2c7; }
+        .status-pass { background: #edf9f0; color: #22863a; border-color: #bef5cb; font-weight: bold; }
+        .status-fail { background: #faecec; color: #cb2431; border-color: #f9c2c7; font-weight: bold; }
+
+        .log-box {
+            width: 100%;
+            height: 200px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            font-family: Consolas, monospace;
+            font-size: 11px;
+            padding: 8px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+            color: #222;
+        }
+
+        .config-formula {
+            font-size: 12px;
+            color: #555;
+            background: #f8f8f8;
+            padding: 6px 10px;
+            border: 1px dashed #ccc;
+            margin-top: 10px;
+        }
+
+        /* Simple Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            max-width: 550px;
+            width: 90%;
+            border: 1px solid #666;
+        }
+
+        .modal-content h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 6px;
+        }
+
+        .modal-content pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header>
+        <h1>Kafka Event-Driven Reliability System</h1>
+        <div class="subtitle">Demonstration of Retry Mechanisms, Dead Letter Queues, and Idempotency</div>
+        <div class="description">
+            This system processes events asynchronously through Apache Kafka and handles failure conditions reliably using exponential backoff retry cycles, dead-letter routing (DLQ), and database-enforced idempotency deduplication.
+        </div>
+    </header>
+
+    <!-- Section A: Event Producer -->
+    <section id="section-a">
+        <h2>Section A: Event Producer</h2>
+        <form id="producerForm" onsubmit="handlePublishEvent(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="eventIdInput">Event ID (leave empty for auto-generated):</label>
+                    <input type="text" id="eventIdInput" placeholder="e.g. EVT-1001">
+                </div>
+                <div class="form-group">
+                    <label for="postContentInput">Post Content:</label>
+                    <input type="text" id="postContentInput" placeholder="Enter message payload" value="Automated social post update">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="failureModeSelect">Failure Simulation:</label>
+                    <select id="failureModeSelect">
+                        <option value="NONE">No Failure (Normal Processing)</option>
+                        <option value="TEMPORARY">Temporary Failure (Simulate Transient Error &amp; Retry)</option>
+                        <option value="PERMANENT">Permanent Failure (Exhaust Retries &amp; Send to DLQ)</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="duplicateCheckbox">
+                    <label for="duplicateCheckbox">Simulate Duplicate Event (Publish same ID twice)</label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">Publish Event</button>
+                <button type="button" onclick="clearProducerForm()">Clear Form</button>
+            </div>
+        </form>
+
+        <div id="producerStatusAlert" class="status-alert" style="display: none;"></div>
+    </section>
+
+    <!-- Section B: Processing Configuration -->
+    <section id="section-b">
+        <h2>Section B: Processing Configuration</h2>
+        <form id="configForm" onsubmit="handleUpdateConfig(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="maxRetriesInput">Maximum Retry Attempts:</label>
+                    <input type="number" id="maxRetriesInput" min="0" max="10" value="3">
+                </div>
+                <div class="form-group">
+                    <label for="initialDelayInput">Initial Retry Delay (ms):</label>
+                    <input type="number" id="initialDelayInput" min="100" max="60000" step="100" value="2000">
+                </div>
+                <div class="form-group">
+                    <label for="multiplierInput">Backoff Multiplier:</label>
+                    <input type="number" id="multiplierInput" min="1.0" max="5.0" step="0.5" value="2.0">
+                </div>
+                <div class="form-group">
+                    <label>Current Retry Attempt (Active):</label>
+                    <input type="text" id="currentAttemptDisplay" value="0" readonly style="background:#eee;">
+                </div>
+            </div>
+            <div class="button-group">
+                <button type="submit">Update Configuration</button>
+            </div>
+        </form>
+
+        <div class="config-formula">
+            <strong>Exponential Backoff Formula:</strong> Delay = Initial Delay &times; (Backoff Multiplier ^ Retry Attempt). Each calculated delay is shown in the processing logs.
+        </div>
+    </section>
+
+    <!-- Section C: Event Processing Results -->
+    <section id="section-c">
+        <h2>
+            Section C: Event Processing Results
+            <button type="button" onclick="loadEvents()" style="font-size:11px; padding:3px 8px;">Refresh</button>
+        </h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Event ID</th>
+                        <th style="width: 140px;">Status</th>
+                        <th style="width: 130px;">Retry Attempts</th>
+                        <th>Processing Result</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                    <tr><td colspan="4" class="empty-state">No events processed yet. Publish an event above to begin.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section D: Dead Letter Queue (DLQ) -->
+    <section id="section-d">
+        <h2>
+            Section D: Dead Letter Queue (DLQ)
+            <button type="button" onclick="loadDlqEvents()" style="font-size:11px; padding:3px 8px;">Refresh DLQ</button>
+        </h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 160px;">Event ID</th>
+                        <th>Event Content</th>
+                        <th>Failure Reason</th>
+                        <th style="width: 110px;">Total Attempts</th>
+                        <th style="width: 150px;">Timestamp</th>
+                        <th style="width: 170px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="dlqTableBody">
+                    <tr><td colspan="6" class="empty-state">No failed events in the Dead Letter Queue.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section E: Idempotency Testing -->
+    <section id="section-e">
+        <h2>Section E: Idempotency Testing</h2>
+        <p style="font-size: 13px; color: #555; margin-bottom: 12px;">
+            Test backend idempotency with persistent uniqueness constraints. Sending the exact same Event ID twice must safely ignore duplicates without repeating post creation.
+        </p>
+        <div class="form-row">
+            <div class="form-group" style="max-width: 300px;">
+                <label for="idempEventId">Event ID for Idempotency Test:</label>
+                <input type="text" id="idempEventId" value="EVT-IDEMP-100">
+            </div>
+            <div class="button-group" style="padding-bottom: 2px;">
+                <button type="button" class="btn-primary" onclick="sendIdempotencyInitial()">Send Event</button>
+                <button type="button" class="btn-secondary" onclick="sendIdempotencyDuplicate()">Send Same Event Again</button>
+            </div>
+        </div>
+        <div id="idempotencyFeedback" class="status-alert" style="display: none;"></div>
+    </section>
+
+    <!-- Section F: Test Controls and Report -->
+    <section id="section-f">
+        <h2>
+            Section F: Test Controls and Report
+            <button type="button" onclick="clearTestResults()" style="font-size:11px; padding:3px 8px;">Clear Test Results</button>
+        </h2>
+        <div class="button-group" style="margin-bottom: 14px;">
+            <button type="button" onclick="runAutomatedTest('SUCCESS')">1. Test Successful Processing</button>
+            <button type="button" onclick="runAutomatedTest('TEMPORARY')">2. Test Temporary Failure and Retry</button>
+            <button type="button" onclick="runAutomatedTest('PERMANENT')">3. Test Permanent Failure and DLQ</button>
+            <button type="button" onclick="runAutomatedTest('DUPLICATE')">4. Test Duplicate Event</button>
+            <button type="button" class="btn-primary" onclick="runAutomatedTest('ALL')">5. Run All Tests</button>
+        </div>
+
+        <div id="testRunningIndicator" style="display:none; font-size: 12px; color: #0366d6; margin-bottom: 10px;">
+            Running test in backend... Please wait.
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 220px;">Test Case</th>
+                        <th>Expected Result</th>
+                        <th>Actual Result</th>
+                        <th style="width: 90px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="testReportTableBody">
+                    <tr><td colspan="4" class="empty-state">No test reports generated yet. Click any test button above.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section G: Processing Logs -->
+    <section id="section-g">
+        <h2>
+            Section G: Processing Logs
+            <div>
+                <button type="button" onclick="loadLogs()" style="font-size:11px; padding:3px 8px;">Refresh Logs</button>
+                <button type="button" onclick="clearLogs()" style="font-size:11px; padding:3px 8px;">Clear Logs</button>
+            </div>
+        </h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Timestamp</th>
+                        <th style="width: 150px;">Event ID</th>
+                        <th style="width: 80px;">Attempt</th>
+                        <th style="width: 190px;">Action</th>
+                        <th>Result / Error Message</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                    <tr><td colspan="5" class="empty-state">No backend logs recorded yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<!-- Details Modal for DLQ -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">DLQ Event Details</h3>
+        <pre id="modalContent"></pre>
+        <div style="text-align: right;">
+            <button type="button" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = '';
+
+    // Status badge mapper
+    function getStatusBadge(status) {
+        if (!status) return '<span class="status-badge status-pending">Pending</span>';
+        const s = status.toUpperCase();
+        if (s.includes('SUCCESS')) return '<span class="status-badge status-success">Success</span>';
+        if (s.includes('RETRY')) return '<span class="status-badge status-retrying">Retrying</span>';
+        if (s.includes('DLQ')) return '<span class="status-badge status-dlq">Sent to DLQ</span>';
+        if (s.includes('DUPLICATE')) return '<span class="status-badge status-duplicate">Duplicate Ignored</span>';
+        if (s.includes('PROCESSING')) return '<span class="status-badge status-processing">Processing</span>';
+        if (s.includes('FAIL')) return '<span class="status-badge status-dlq">Failed</span>';
+        return `<span class="status-badge status-pending">${status}</span>`;
+    }
+
+    function formatTime(isoString) {
+        if (!isoString) return '-';
+        try {
+            const d = new Date(isoString);
+            return d.toLocaleTimeString() + '.' + String(d.getMilliseconds()).padStart(3, '0');
+        } catch (e) {
+            return isoString;
+        }
+    }
+
+    // --- Section A: Publish Event ---
+    async function handlePublishEvent(e) {
+        e.preventDefault();
+        const eventId = document.getElementById('eventIdInput').value.trim();
+        const content = document.getElementById('postContentInput').value.trim();
+        const failureSimulation = document.getElementById('failureModeSelect').value;
+        const simulateDuplicate = document.getElementById('duplicateCheckbox').checked;
+
+        const payload = {
+            eventId: eventId || null,
+            content: content || 'Post content',
+            failureSimulation: failureSimulation,
+            simulateDuplicate: simulateDuplicate
+        };
+
+        const alertBox = document.getElementById('producerStatusAlert');
+        alertBox.style.display = 'block';
+        alertBox.innerHTML = 'Publishing event to Kafka...';
+
+        try {
+            const res = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alertBox.innerHTML = `<strong>Published:</strong> Event ID <code>${data.event.eventId}</code> submitted to topic <code>scheduled-posts</code>. Mode: <strong>${data.event.failureSimulation}</strong>. Status: <span class="status-badge status-processing">Processing</span>`;
+                loadEvents();
+                loadLogs();
+            } else {
+                alertBox.innerHTML = `<strong>Error:</strong> ${data.message || 'Failed to publish'}`;
+            }
+        } catch (err) {
+            alertBox.innerHTML = `<strong>Network Error:</strong> ${err.message}`;
+        }
+    }
+
+    function clearProducerForm() {
+        document.getElementById('producerForm').reset();
+        document.getElementById('producerStatusAlert').style.display = 'none';
+    }
+
+    // --- Section B: Configuration ---
+    async function loadConfig() {
+        try {
+            const res = await fetch('/api/config');
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('maxRetriesInput').value = data.maxRetryAttempts;
+                document.getElementById('initialDelayInput').value = data.initialRetryDelay;
+                document.getElementById('multiplierInput').value = data.backoffMultiplier;
+                document.getElementById('currentAttemptDisplay').value = data.currentRetryAttempt || 0;
+            }
+        } catch (e) {
+            console.error('Config fetch failed:', e);
+        }
+    }
+
+    async function handleUpdateConfig(e) {
+        e.preventDefault();
+        const payload = {
+            maxRetryAttempts: parseInt(document.getElementById('maxRetriesInput').value),
+            initialRetryDelay: parseInt(document.getElementById('initialDelayInput').value),
+            backoffMultiplier: parseFloat(document.getElementById('multiplierInput').value)
+        };
+        try {
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('Reliability settings updated successfully!');
+                loadConfig();
+            }
+        } catch (err) {
+            alert('Failed to update config: ' + err.message);
+        }
+    }
+
+    // --- Section C: Load Events ---
+    async function loadEvents() {
+        try {
+            const res = await fetch('/api/events');
+            if (!res.ok) return;
+            const events = await res.json();
+            const tbody = document.getElementById('eventsTableBody');
+
+            if (!events || events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No events processed yet. Publish an event above to begin.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = events.map(evt => `
+                <tr>
+                    <td><code>${evt.eventId}</code></td>
+                    <td>${getStatusBadge(evt.status)}</td>
+                    <td>${evt.retryAttempts}</td>
+                    <td>${escapeHtml(evt.processingResult || '-')}</td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load events:', e);
+        }
+    }
+
+    // --- Section D: Dead Letter Queue ---
+    let currentDlqList = [];
+    async function loadDlqEvents() {
+        try {
+            const res = await fetch('/api/dlq');
+            if (!res.ok) return;
+            currentDlqList = await res.json();
+            const tbody = document.getElementById('dlqTableBody');
+
+            if (!currentDlqList || currentDlqList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No failed events in the Dead Letter Queue.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentDlqList.map((item, index) => `
+                <tr>
+                    <td><code>${item.eventId}</code></td>
+                    <td>${escapeHtml(item.eventContent || '-')}</td>
+                    <td style="color:#cb2431;">${escapeHtml(item.failureReason || '-')}</td>
+                    <td>${item.totalAttempts}</td>
+                    <td>${formatTime(item.timestamp)}</td>
+                    <td>
+                        <button type="button" style="font-size:11px; padding:2px 6px;" onclick="viewDlqDetails(${index})">View Details</button>
+                        <button type="button" class="btn-primary" style="font-size:11px; padding:2px 6px;" onclick="retryDlqEvent('${item.eventId}')">Retry DLQ Event</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load DLQ events:', e);
+        }
+    }
+
+    function viewDlqDetails(index) {
+        const item = currentDlqList[index];
+        if (!item) return;
+        document.getElementById('modalTitle').innerText = 'DLQ Entry Details: ' + item.eventId;
+        document.getElementById('modalContent').innerText = JSON.stringify(item, null, 2);
+        document.getElementById('detailsModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    async function retryDlqEvent(eventId) {
+        if (!confirm(`Reprocess DLQ event '${eventId}'? It will retain its original Event ID and safely execute without duplicate side-effects.`)) return;
+
+        try {
+            const res = await fetch(`/api/events/${eventId}/retry`, { method: 'POST' });
+            const data = await res.json();
+            alert(data.message);
+            loadDlqEvents();
+            loadEvents();
+            loadLogs();
+        } catch (e) {
+            alert('Error retrying DLQ event: ' + e.message);
+        }
+    }
+
+    // --- Section E: Idempotency Testing ---
+    async function sendIdempotencyInitial() {
+        const eventId = document.getElementById('idempEventId').value.trim();
+        if (!eventId) { alert('Please enter an Event ID'); return; }
+
+        const feedback = document.getElementById('idempotencyFeedback');
+        feedback.style.display = 'block';
+        feedback.innerHTML = `Sending initial event <code>${eventId}</code>...`;
+
+        try {
+            const res = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    eventId: eventId,
+                    content: 'Initial idempotent post for ' + eventId,
+                    failureSimulation: 'NONE',
+                    simulateDuplicate: false
+                })
+            });
+            const data = await res.json();
+            feedback.innerHTML = `<strong>First Event Sent:</strong> <code>${eventId}</code> published. Check results table below — processed for the first time.`;
+            loadEvents();
+            loadLogs();
+        } catch (e) {
+            feedback.innerHTML = `<strong>Error:</strong> ${e.message}`;
+        }
+    }
+
+    async function sendIdempotencyDuplicate() {
+        const eventId = document.getElementById('idempEventId').value.trim();
+        if (!eventId) { alert('Please enter an Event ID'); return; }
+
+        const feedback = document.getElementById('idempotencyFeedback');
+        feedback.style.display = 'block';
+        feedback.innerHTML = `Sending duplicate event with SAME ID <code>${eventId}</code>...`;
+
+        try {
+            const res = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    eventId: eventId,
+                    content: 'Duplicate attempt for ' + eventId,
+                    failureSimulation: 'NONE',
+                    simulateDuplicate: false
+                })
+            });
+            const data = await res.json();
+            feedback.innerHTML = `<strong>Duplicate Event Sent:</strong> <code>${eventId}</code> sent again. Backend idempotency filter detected duplicate & prevented duplicate post creation. Status: <span class="status-badge status-duplicate">Duplicate Ignored</span>`;
+            loadEvents();
+            loadLogs();
+        } catch (e) {
+            feedback.innerHTML = `<strong>Error:</strong> ${e.message}`;
+        }
+    }
+
+    // --- Section F: Automated Tests ---
+    async function runAutomatedTest(testType) {
+        const indicator = document.getElementById('testRunningIndicator');
+        indicator.style.display = 'block';
+        indicator.innerText = `Executing ${testType} test scenario on backend... please wait`;
+
+        try {
+            const res = await fetch('/api/tests/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test: testType })
+            });
+            const data = await res.json();
+            loadTestReports();
+            loadEvents();
+            loadDlqEvents();
+            loadLogs();
+        } catch (e) {
+            alert('Failed to execute test: ' + e.message);
+        } finally {
+            indicator.style.display = 'none';
+        }
+    }
+
+    async function loadTestReports() {
+        try {
+            const res = await fetch('/api/tests/report');
+            if (!res.ok) return;
+            const reports = await res.json();
+            const tbody = document.getElementById('testReportTableBody');
+
+            if (!reports || reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No test reports generated yet. Click any test button above.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = reports.map(r => `
+                <tr>
+                    <td><strong>${escapeHtml(r.testCase)}</strong></td>
+                    <td>${escapeHtml(r.expectedResult)}</td>
+                    <td>${escapeHtml(r.actualResult)}</td>
+                    <td><span class="status-badge ${r.status === 'PASS' ? 'status-pass' : 'status-fail'}">${r.status}</span></td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load test reports:', e);
+        }
+    }
+
+    async function clearTestResults() {
+        if (!confirm('Clear all test results?')) return;
+        try {
+            await fetch('/api/tests/clear', { method: 'POST' });
+            loadTestReports();
+        } catch (e) {
+            alert('Error clearing tests: ' + e.message);
+        }
+    }
+
+    // --- Section G: Processing Logs ---
+    async function loadLogs() {
+        try {
+            const res = await fetch('/api/logs');
+            if (!res.ok) return;
+            const logs = await res.json();
+            const tbody = document.getElementById('logsTableBody');
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No backend logs recorded yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(l => `
+                <tr>
+                    <td>${formatTime(l.timestamp)}</td>
+                    <td><code>${l.eventId || '-'}</code></td>
+                    <td style="text-align:center;">${l.retryAttempt}</td>
+                    <td><strong>${escapeHtml(l.action || '-')}</strong></td>
+                    <td>${escapeHtml(l.result || '-')}</td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error('Failed to load logs:', e);
+        }
+    }
+
+    async function clearLogs() {
+        try {
+            await fetch('/api/logs/clear', { method: 'POST' });
+            loadLogs();
+        } catch (e) {
+            alert('Error clearing logs: ' + e.message);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // Periodic Polling every 1.5 seconds
+    setInterval(() => {
+        loadEvents();
+        loadDlqEvents();
+        loadLogs();
+    }, 1500);
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+        loadConfig();
+        loadEvents();
+        loadDlqEvents();
+        loadTestReports();
+        loadLogs();
+    });
+</script>
+
+</body>
+</html>
