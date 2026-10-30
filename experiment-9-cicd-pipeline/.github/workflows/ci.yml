@@ -1,11 +1,12 @@
 name: CI Pipeline - Automated Build & Testing
 
-# Triggers on code push or PR targeting the main branch
+# Triggers on code push or PR targeting the main branch, or manual dispatch
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-and-test:
